@@ -37,6 +37,22 @@ class EventUpdate(BaseModel):
     status: Optional[EventStatus] = None
 
 
+from pydantic import BaseModel
+
+class PublisherCreate(BaseModel):
+    name: str
+    city: str | None = None
+
+class PublisherOut(BaseModel):
+    id: int
+    name: str
+    city: str | None = None
+    api_key: str
+
+    class Config:
+        from_attributes = True
+
+
 class EventOut(BaseModel):
     id: int
     city: str
