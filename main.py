@@ -320,3 +320,39 @@ def delete_event(
     db.delete(event)
     db.commit()
     return None
+
+
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from db import get_db
+from models import Publisher
+from schemas import PublisherCreate, PublisherOut
+
+# If you already have this in seed.py, move it to a shared utils.py and import it.
+import secrets
+def generate_api_key(prefix: str = "pk") -> str:
+    return f"{prefix}_{secrets.token_urlsafe(24)}"
+
+
+@app.post("/admin/publishers", response_model=PublisherOut, dependencies=[Depends(require_admin_key)])
+def admin_create_publisher(payload: PublisherCreate, db: Session = Depends(get_db)):
+    # optional: prevent duplicates by name+city
+    existing = (
+        db.query(Publisher)
+        .filter(Publisher.name == payload.name)
+        .filter(Publisher.city == payload.city)
+        .first()
+    )
+    if existing:
+        return existing  # or raise 409 if you prefer
+
+    pub = Publisher(
+        name=payload.name,
+        city=payload.city,
+        api_key=generate_api_key("pk"),
+    )
+    db.add(pub)
+    db.commit()
+    db.refresh(pub)
+    return pub
