@@ -135,6 +135,32 @@ def deactivate_publisher(publisher_id: int, db: Session = Depends(get_db)):
     db.refresh(pub)
     return pub
 
+from fastapi import Header, HTTPException
+from db import Base, engine
+import os
+
+# ✅ create tables (safe to call multiple times)
+@app.post("/admin/seed")
+def admin_seed(x_admin_key: str | None = Header(default=None)):
+    # validate admin key
+    server_key = os.getenv("OPENCIRCLE_ADMIN_KEY")
+    if not server_key:
+        raise HTTPException(status_code=500, detail="Server admin key not configured")
+    if not x_admin_key or x_admin_key != server_key:
+        raise HTTPException(status_code=401, detail="Invalid admin key")
+
+    # create tables
+    Base.metadata.create_all(bind=engine)
+
+    # run your seed script logic
+    # If your seed.py already runs seeding when executed, import and call a function.
+    # The best pattern is: seed.py exposes seed() you can call.
+    from seed import run_seed  # rename to whatever you have
+    run_seed()
+
+    return {"ok": True, "seeded": True}
+
+
 # -------------------------
 # ADMIN: review + publish workflow
 # -------------------------
