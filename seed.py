@@ -5,7 +5,7 @@ from models import Event, Publisher
 def utcnow():
     return datetime.now(timezone.utc)
 
-def run():
+def run_seed():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
