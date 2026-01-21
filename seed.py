@@ -49,4 +49,4 @@ def run_seed():
         db.close()
 
 if __name__ == "__main__":
-    run()
+    run_seed()
