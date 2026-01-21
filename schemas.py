@@ -75,16 +75,19 @@ class EventOut(BaseModel):
         from_attributes = True
 
 
+from pydantic import BaseModel, Field
+from typing import List, Optional
+
 class PublisherCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
-    api_key: str = Field(..., min_length=12, max_length=200)
-    allowed_cities: List[str] = Field(..., min_length=1)
+    allowed_cities: List[str] = Field(default_factory=list)
     is_active: bool = True
 
 class PublisherOut(BaseModel):
     id: int
     name: str
-    allowed_cities: str
+    api_key: str
+    allowed_cities: List[str]
     is_active: bool
 
     class Config:
